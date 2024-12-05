@@ -1,0 +1,6 @@
+#lang racket
+
+; DI_COM test
+(connect `AI1- `n1-9)
+(connect `AI1+ `VDC24)
+(expect "Bad ground on n1-9" (EQ-WITHIN `AI1 24 1))

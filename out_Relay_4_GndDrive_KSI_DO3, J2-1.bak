@@ -1,0 +1,7 @@
+#lang racket
+
+; out_Relay_4_GndDrive_KSI_DO3, J2-1 test
+(connect `n1-14 `24VDC)
+(connect `AI0 `J2-1)
+(enable `24VDC)
+(expect "Relay K4, J2-1 No Output" (EQ-WITHIN `AI0 48 1))

@@ -1,0 +1,19 @@
+AI0
+J2-22
+CONNECT
+AI0
+AI
+0
+GT
+5
+LT
+"Fail reason"
+EXPECT
+
+\ "EXPECTED J2-22 > 0 && J22-22 < 5"
+
+AI0
+J2-22
+0
+5
+EXPECT_AI_RANGE

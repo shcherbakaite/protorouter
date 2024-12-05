@@ -1,0 +1,6 @@
+#lang racket
+
+; in_KEY_ON_DI4 test
+(connect `J5a-19 `VDC24)
+(connect `AI0 `n1-5)
+(expect (EQ-WITHIN `AI0 24 1))
