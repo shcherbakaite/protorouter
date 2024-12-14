@@ -1,7 +1,15 @@
 #lang racket
 
-; out_Relay_4_GndDrive_KSI_DO3, J2-1 test
-(connect `n1-14 `24VDC)
-(connect `AI0 `J2-1)
-(enable `24VDC)
-(expect "Applied 24V via n1-14 to Coil of Relay K4. Expected 48V on J2-1" (EQ-WITHIN `AI0 48 1))
+; Aux power ON
+(connect `PS_RAIL2 `n1-32)
+(ps-set `PS_RAIL2 24)
+
+; out_Relay_3_Lights_Drive_Fwd_DO6
+(connect `PS_RAIL1 `n1-17)
+(connect `DMM_V_LO `GND)
+(ps-set `PS_RAIL1 12)
+
+(connect `DMM_V_HI `J2-21)
+(expect "Applied 12V via n1-17 to Coil of Relay K3. Expected 12V on J2-21" (eq-within `DMM_V 12 1))
+(connect `DMM_V_HI `J2-22)
+(expect "Applied 12V via n1-17 to Coil of Relay K3. Expected 12V on J2-22" (eq-within `DMM_V 12 1))

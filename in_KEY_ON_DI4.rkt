@@ -1,7 +1,8 @@
 #lang racket
 
 ; in_KEY_ON_DI4 test
-(connect `J5a-19 `VDC24)
-(connect `AI0 `n1-5)
-(enable `24VDC)
-(expect "Applied 24V to J5a-19. Expected 24V on n1-5" (EQ-WITHIN `AI0 24 1))
+(expect "Measured resistance from J5a-19 to n1-5. Expected < 0.5 Ohm." (resistance-lt `n1-5 `J5a-19 0.5))
+
+
+
+
