@@ -14,12 +14,13 @@
 ; Declare array of resources on X-side of the matrix
 (define resources 
   (array
-   #[`DMM_V_HI
+   #[`DMM-V_HI
      `DMM_LO
      `DMM_I_HI
      `PS_RAIL1
      `PS_RAIL2
-     `PS_RAIL3]))
+     `PS_RAIL3
+     `LOAD_1]))
 
 ;(ps-set `PS_RAIL1 24)
 ;(ps-set `PS_RAIL1 `GND)
@@ -30,6 +31,8 @@
 (define targets 
   (array
    #[`GND      ; Reference for DMM needs to be on Y side
+     `DMM_I
+     `LOAD_2
      `J2-1
      `J2-2
      `J2-3
@@ -224,11 +227,113 @@
 
 (define (lt) #f)
 
-; Test resistance from a to b, returns true if resistance is less than r
-(define (resistance a b r)
+; Perform resistance measurement between target pins a and b
+; a, b - > R(a,b)
+(define (resistance a b)
+  (disconnect `DMM_LO)
+  (disconnect `DMM-V_HI)
   (connect `DMM_LO a )
-  (connect `DMM_V_HI b)
-  (lt `DMM_R 0.5))
+  (connect `DMM-V_HI b)
+  (let ([v (dmm-r)])
+    (disconnect `DMM_LO) ; clean up
+    (disconnect `DMM-V_HI)
+    v))
+
+; Connect DMM probes for voltage test
+(define (voltage a)
+  (connect `DMM_LO a )
+  (connect `DMM-V_HI 'GND)
+  (dmm-v))
+
+(define (voltage-reference a)
+  (connect `DMM_LO a ))
+
+; Apply voltage to pin
+(define (apply-voltage v a)
+  (connect `PS_RAIL1 a )
+  (power-supply-set `PS_RAIL1 v))
+
+; Create a reference potential and measure it against some ground pin
+(define (grounded? a level err)
+  (connect `DMM_LO a)
+  (connect `DMM-V_HI `PS_RAIL1)
+  (power-supply-set `PS_RAIL1 level)
+  (eq-within (dmm-v) level err))
+
+; Run a cross-talk test
+(define (static-test exclusion)
+    (voltage `n1-3)
+    (voltage `n1-7)
+  )
+
+; Connect DMM probes for voltage test
+(define (fus a)
+  (connect `DMM_LO a )
+  (connect `DMM-V_HI 'GND))
+
+; Connect DMM probes for resistance test
+(define (ro a b)
+  (connect `DMM_LO a )
+  (connect `DMM-V_HI b))
+
+; Apply voltage to pin
+(define (dah v a)
+  (connect `PS_RAIL1 a )
+  (power-supply-set `PS_RAIL1 v))
+
+
+(define static-levels-off
+  `((n1-1 . 0)
+    (n1-3 . 0)
+    (n1-2 . 0)
+    (n1-4 . 0)
+    (n1-5 . 0)
+    (n1-6 . 0)
+    (n1-7 . 0)
+    (n1-8 . 0)
+    (n1-9 . 0)
+    (n1-10 . 0)
+    (n1-12 . 0)
+    (n1-13 . 2)
+    (n1-14 . 0)
+    (n1-15 . 0)
+    (n1-16 . 0)
+    (n1-17 . 0)
+    (n1-18 . 0)
+    (n1-19 . 0)))
+
+(define static-levels-off
+  `(((n1-1 . n1-2) . 120)
+    (n1-3 . 0)
+    (n1-2 . 0)
+    (n1-4 . 0)
+    (n1-5 . 0)
+    (n1-6 . 0)
+    (n1-7 . 0)
+    (n1-8 . 0)
+    (n1-9 . 0)
+    (n1-10 . 0)
+    (n1-12 . 0)
+    (n1-13 . 2)
+    (n1-14 . 0)
+    (n1-15 . 0)
+    (n1-16 . 0)
+    (n1-17 . 0)
+    (n1-18 . 0)
+    (n1-19 . 0)))
+
+(define (static-voltage-check levels))
+(for ([x levels])
+  (let ([p (car x)]
+        [v (cdr x)])
+    (displayln (string-append (symbol->string p) " " (number->string v) "V"))))
+
+
+(define (static-check-excluding levels excluding)
+  ())
+
+(define (resistance-map map)
+  )
 
 (array
  #[
@@ -236,3 +341,68 @@
   #[1 2 3 4 5]
   #[2 3 4 5 6]
   #[3 4 5 6 7]])
+
+; (power-supply-passthrough `PS_RAIL1)
+; (power-supply-disable `PS_RAIL1)
+; (power-supply-enable `PS_RAIL1)
+
+(define (dmm-v) 48.5)
+
+(define (eq-within value err)
+	(and (< value (+ value err)) (> value (- value err))))
+
+; (define (lt f value)
+;   (< (f) value
+
+; (expect-resistance-eq `UTSG-4 `UTSG-3 120 5)
+; (expect-resistance-lt `UTSG-4 `UTSG-3 0.5)
+
+(define (expect-resistance-eq a b expected err)
+  (let ([measured (resistance a b)])
+    (expect (format "Expected resistance between ~s and ~s is ~s (+/- ~s) Ohm. Measured ~s Ohm." a b expected err measured) (eq-within measured expected err))))
+
+(define (expect-resistance-lt a b expected)
+  (let ([measured (resistance a b)])
+    (expect (format "Expected resistance between ~s and ~s to be less than ~s Ohm. Measured ~s Ohm." a b expected measured) (< measured expected))))
+
+
+(define (expect-resistance-gt a b expected)
+  (let ([measured (resistance a b)])
+    (expect (format "Expected resistance between ~s and ~s to be greater than ~s Ohm. Measured ~s Ohm." a b expected measured) (> measured expected))))
+
+(define (expect-voltage-eq a expected err)
+  (let ([measured (voltage a)])
+    (expect (format "Expected ~s (+/- ~s) V on ~s. Measured ~s V." expected err a) (eq-within measured expected err))))
+
+
+
+; "Expected 120 (+/-5) Ohm terminator between pin UTSG-4 and UTSG-3. Measured 75 Ohm"
+
+; set background state
+; modify state
+; check state
+
+
+; (define resistance-map
+;   `(((n2b-2 . J2-47) (expect-resistance-lt 0.5) )
+;     ((n2b-7 . J2-48) (λ (x) (< x 0.5) ))
+;     ((n2b-2 . n2b-7) (λ (x) (eq-within x 120 5) ))
+;     ((J2-47 . J2-48) (λ (x) (eq-within x 120 5) ))
+;     ((UTSG-4 . UTSG-3) (λ (x) (eq-within x 120 5)))))
+
+
+; ; Measure resistance of pin pairs
+; (define (resistance-map pairs)
+;   (map pairs ( λ (p) (resistance (car p) (cdr p)) ))
+
+
+
+
+
+
+
+
+
+
+
+  
