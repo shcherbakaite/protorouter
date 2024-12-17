@@ -1,4 +1,4 @@
-#lang racket
+;#lang racket
 
 ; n1_VSUP
 ; Master Bus On
@@ -8,4 +8,4 @@
 
 (expect-voltage-eq `n1-19 24 1)
 
-(disconnect-all)
+;(disconnect-all)

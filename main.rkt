@@ -1,4 +1,10 @@
-#lang racket
+#lang racket/load
+
+(require "connections.rkt")
+
+(require "power-supply.rkt")
+
+(require "dmm.rkt")
 
 ; This test model is written in Racket. Why Racket? Racket is a LISP and by its nature encourages
 ; writing very succint programs - which is exactly the quality needed for programming small test sequences.
@@ -12,27 +18,39 @@
 ; This tester model is based on relay matrix. 
 
 ; Declare array of resources on X-side of the matrix
-(define resources 
+(define X 
   (array
    #[`DMM-V_HI
      `DMM_LO
-     `DMM_I_HI
-     `PS_RAIL1
-     `PS_RAIL2
+     `DMM_I_HI ; For Low-side current measurement
+     `PS_RAIL1 ; 48V Passthrough
+     `PS_RAIL2 
      `PS_RAIL3
-     `LOAD_1]))
+     `GND]))
 
-;(ps-set `PS_RAIL1 24)
-;(ps-set `PS_RAIL1 `GND)
-;(ps-set `PS_RAIL1 `BATTERY)
-;(ps-disable `PS_RAIL1)
+
+; Low side current sense
+;(connect `PS_RAIL1 `J2-16)
+;(connect `DMM_I_HI `J2-32)
+;(connect `DMM_LO `GND)
+
+; High side current sense
+;(connect `PS_RAIL1 `DMM_I_HI)
+;(connect `DMM_LO `J2-16)
+;(connect `J2-32 `GND)
+
+
 
 ; Declare array of target test connections on the Y-side of the matrix
-(define targets 
+(define Y 
   (array
-   #[`GND      ; Reference for DMM needs to be on Y side
-     `DMM_I
-     `LOAD_2
+   #[`DMM-V_HI
+     `DMM_LO
+     `DMM_I_HI ; For High-side current measurement
+     `PS_RAIL1 ; 48V Passthrough
+     `PS_RAIL2 
+     `PS_RAIL3
+     `GND
      `J2-1
      `J2-2
      `J2-3
@@ -193,11 +211,17 @@
      
 ]))
 
+(define (disconnect a)
+  `())
+
+
+
+
 ; Declare boolean matrix of relay states where each relay at X Y
 ; connects row X to column Y when the value at X Y is #t
 (define matrix
   (array->mutable-array (make-array
-                         (vector (array-size resources) (array-size targets) ) #f)))
+                         (vector (array-size X) (array-size Y) ) #f)))
 
 ; Clear column x of array arr
 (define (set-column arr x value)
@@ -219,7 +243,7 @@
 
 ; Create exclusive connection between resource X and target Y.
 ; All existing connectiond of X and Y are severed.
-(define (connect x y)
+(define (matrix-connect x y)
   (matrix-clear-col x) ; disconnect resource x from any other targets
   (matrix-clear-row y) ; disconnect target y from any other resources
   (array-set! matrix (vector x y) #t))
@@ -227,44 +251,8 @@
 
 (define (lt) #f)
 
-; Perform resistance measurement between target pins a and b
-; a, b - > R(a,b)
-(define (resistance a b)
-  (disconnect `DMM_LO)
-  (disconnect `DMM-V_HI)
-  (connect `DMM_LO a )
-  (connect `DMM-V_HI b)
-  (let ([v (dmm-r)])
-    (disconnect `DMM_LO) ; clean up
-    (disconnect `DMM-V_HI)
-    v))
 
-; Connect DMM probes for voltage test
-(define (voltage a)
-  (connect `DMM_LO a )
-  (connect `DMM-V_HI 'GND)
-  (dmm-v))
 
-(define (voltage-reference a)
-  (connect `DMM_LO a ))
-
-; Apply voltage to pin
-(define (apply-voltage v a)
-  (connect `PS_RAIL1 a )
-  (power-supply-set `PS_RAIL1 v))
-
-; Create a reference potential and measure it against some ground pin
-(define (grounded? a level err)
-  (connect `DMM_LO a)
-  (connect `DMM-V_HI `PS_RAIL1)
-  (power-supply-set `PS_RAIL1 level)
-  (eq-within (dmm-v) level err))
-
-; Run a cross-talk test
-(define (static-test exclusion)
-    (voltage `n1-3)
-    (voltage `n1-7)
-  )
 
 ; Connect DMM probes for voltage test
 (define (fus a)
@@ -282,58 +270,6 @@
   (power-supply-set `PS_RAIL1 v))
 
 
-(define static-levels-off
-  `((n1-1 . 0)
-    (n1-3 . 0)
-    (n1-2 . 0)
-    (n1-4 . 0)
-    (n1-5 . 0)
-    (n1-6 . 0)
-    (n1-7 . 0)
-    (n1-8 . 0)
-    (n1-9 . 0)
-    (n1-10 . 0)
-    (n1-12 . 0)
-    (n1-13 . 2)
-    (n1-14 . 0)
-    (n1-15 . 0)
-    (n1-16 . 0)
-    (n1-17 . 0)
-    (n1-18 . 0)
-    (n1-19 . 0)))
-
-(define static-levels-off
-  `(((n1-1 . n1-2) . 120)
-    (n1-3 . 0)
-    (n1-2 . 0)
-    (n1-4 . 0)
-    (n1-5 . 0)
-    (n1-6 . 0)
-    (n1-7 . 0)
-    (n1-8 . 0)
-    (n1-9 . 0)
-    (n1-10 . 0)
-    (n1-12 . 0)
-    (n1-13 . 2)
-    (n1-14 . 0)
-    (n1-15 . 0)
-    (n1-16 . 0)
-    (n1-17 . 0)
-    (n1-18 . 0)
-    (n1-19 . 0)))
-
-(define (static-voltage-check levels))
-(for ([x levels])
-  (let ([p (car x)]
-        [v (cdr x)])
-    (displayln (string-append (symbol->string p) " " (number->string v) "V"))))
-
-
-(define (static-check-excluding levels excluding)
-  ())
-
-(define (resistance-map map)
-  )
 
 (array
  #[
@@ -346,16 +282,22 @@
 ; (power-supply-disable `PS_RAIL1)
 ; (power-supply-enable `PS_RAIL1)
 
-(define (dmm-v) 48.5)
 
-(define (eq-within value err)
-	(and (< value (+ value err)) (> value (- value err))))
+
+(define (eq-within measured expected err)
+	(and (< measured (+ expected err)) (> measured (- expected err))))
 
 ; (define (lt f value)
 ;   (< (f) value
 
 ; (expect-resistance-eq `UTSG-4 `UTSG-3 120 5)
 ; (expect-resistance-lt `UTSG-4 `UTSG-3 0.5)
+
+
+(define-syntax-rule (expect msg expr)
+  (when (not expr)
+    (error 'expect "~s: ~s" msg (quote expr))))
+
 
 (define (expect-resistance-eq a b expected err)
   (let ([measured (resistance a b)])
@@ -401,8 +343,7 @@
 
 
 
-
-
-
+(load "n1-15_J5a-18_J2-2_J2-38_J2-43_out_Relay_6_GndDrive_Interlock_DO4.rkt")
+(display (set-count connections))
 
   

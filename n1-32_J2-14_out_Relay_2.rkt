@@ -1,4 +1,4 @@
-#lang racket
+;#lang racket
 
 ; out_Relay_2, J2-14.rkt
 
@@ -10,6 +10,6 @@
 (let ([v (voltage `J2-14)])
     (expect (format "Enabled auxilary power, relay K2. Expected 24V on J2-14. Measured ~s V." v) (eq-within v 24 1)))
 
-(disconnect-all)
+;(disconnect-all)
 
 
