@@ -6,6 +6,8 @@
 
 (require "dmm.rkt")
 
+(require "visualize.rkt")
+
 ; This test model is written in Racket. Why Racket? Racket is a LISP and by its nature encourages
 ; writing very succint programs - which is exactly the quality needed for programming small test sequences.
 ; Racket has a track record of being used as a scripting language in commercial settings, but it is far
