@@ -1,6 +1,0 @@
-#lang racket
-
-; E-STOP test
-(connect `J5a `VDC24)
-(connect `AI0 `n1-1)
-(expect (EQ-WITHIN `AI0 24 1))

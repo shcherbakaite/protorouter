@@ -1,16 +1,19 @@
 #lang racket
 
-(provide X-axis)
+(provide X-axis Y-axis)
 
 (define X-axis
 (list
-     `DMM-V_HI ; Test resources
+     `DMM_V_HI ; Test resources
      `DMM_LO
      `DMM_I_HI
      `PS_RAIL1
      `PS_RAIL2 
      `PS_RAIL3	
      `GND
+     `J1-A
+     `J1-B
+     `J1-C
      `J2-1 ; 
      `J2-2
      `J2-3
@@ -70,38 +73,38 @@
      `J2-58
      `J2-59
      `J2-60
-     `J5-1 ; OPERATOR CONSOLE
-     `J5-2
-     `J5-3
-     `J5-4
-     `J5-5
-     `J5-6
-     `J5-7
-     `J5-8
-     `J5-9
-     `J5-11
-     `J5-12
-     `J5-13
-     `J5-14
-     `J5-15
-     `J5-16
-     `J5-17
-     `J5-18
-     `J5-19
-     `J5-20
-     `J5-21
-     `J5-22
-     `J5-23
-     `J5-24
-     `J5-25
-     `J5-26
-     `J5-27
-     `J5-28
-     `J5-29
-     `J5-30
-     `J5-31
-     `J5-32
-     `J5-33
+     `J5a-1 ; OPERATOR CONSOLE
+     `J5a-2
+     `J5a-3
+     `J5a-4
+     `J5a-5
+     `J5a-6
+     `J5a-7
+     `J5a-8
+     `J5a-9
+     `J5a-11
+     `J5a-12
+     `J5a-13
+     `J5a-14
+     `J5a-15
+     `J5a-16
+     `J5a-17
+     `J5a-18
+     `J5a-19
+     `J5a-20
+     `J5a-21
+     `J5a-22
+     `J5a-23
+     `J5a-24
+     `J5a-25
+     `J5a-26
+     `J5a-27
+     `J5a-28
+     `J5a-29
+     `J5a-30
+     `J5a-31
+     `J5a-32
+     `J5a-33
      `n1-1 ; DIGITAL IO
      `n1-2
      `n1-3
@@ -207,3 +210,11 @@
      `UTSG-4
 ))
 
+(define Y-axis
+(list
+     `ROW1 ; Net connection resources
+     `ROW2
+     `ROW3
+     `ROW4
+     `ROW5
+     `ROW6))

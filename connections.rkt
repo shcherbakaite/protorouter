@@ -2,7 +2,7 @@
 
 ;; Keep track of connections
 
-(provide connection connect connections disconnect disconnect-all)
+(provide connection connect connections disconnect disconnect-all connection-a connection-b)
 
 (require racket/struct)
 

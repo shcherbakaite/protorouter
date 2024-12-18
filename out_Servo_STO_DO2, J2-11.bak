@@ -1,7 +1,0 @@
-#lang racket
-
-; out_Servo_STO_DO2, J2-11 test
-(connect `n1-13 `24VDC)
-(connect `AI0 `J2-11)
-(enable `24VDC)
-(expect "n1-13, TSTO1, J2-11, No Output" (EQ-WITHIN `AI0 24 1))

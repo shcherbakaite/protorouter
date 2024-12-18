@@ -1,6 +1,0 @@
-#lang racket
-
-; in_Safety_Estop_DI0 test
-(connect `J5a-18 `VDC24)
-(connect `AI0 `n1-1)
-(expect (EQ-WITHIN `AI0 24 1))
