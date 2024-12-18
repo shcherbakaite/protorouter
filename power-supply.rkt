@@ -8,7 +8,6 @@
 
 (define available-resources (mutable-set `PS_RAIL1 `PS_RAIL2 `PS_RAIL3))
 
-
 ;; Low Level Power Management
 
 (define (power-supply-set rail v)

@@ -22,7 +22,7 @@
 ; Declare array of resources on X-side of the matrix
 (define X 
   (array
-   #[`DMM-V_HI
+   #[`DMM_V_HI
      `DMM_LO
      `DMM_I_HI ; For Low-side current measurement
      `PS_RAIL1 ; 48V Passthrough
@@ -46,7 +46,7 @@
 ; Declare array of target test connections on the Y-side of the matrix
 (define Y 
   (array
-   #[`DMM-V_HI
+   #[`DMM_V_HI
      `DMM_LO
      `DMM_I_HI ; For High-side current measurement
      `PS_RAIL1 ; 48V Passthrough
@@ -259,12 +259,12 @@
 ; Connect DMM probes for voltage test
 (define (fus a)
   (connect `DMM_LO a )
-  (connect `DMM-V_HI 'GND))
+  (connect `DMM_V_HI 'GND))
 
 ; Connect DMM probes for resistance test
 (define (ro a b)
   (connect `DMM_LO a )
-  (connect `DMM-V_HI b))
+  (connect `DMM_V_HI b))
 
 ; Apply voltage to pin
 (define (dah v a)
@@ -345,7 +345,7 @@
 
 
 
-(load "n1-15_J5a-18_J2-2_J2-38_J2-43_out_Relay_6_GndDrive_Interlock_DO4.rkt")
-(display (set-count connections))
+(load "n1-12_J2-19_out_Relay_7_CU_Contactor_DO1.rkt")
+(displayln (set-count connections))
 
   

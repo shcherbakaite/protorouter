@@ -1,10 +1,14 @@
 #lang racket
 
-(provide matrix-implement-net matrix-implement-nets matrix-dim-y matrix-dim-x matrix-connected? matrix-connect)
+(provide matrix-implement-net matrix-implement-nets matrix-dim-y matrix-dim-x matrix-connected? matrix-connect matrix-implement-current-connections)
 
 (require math)
 
 (require "targets.rkt")
+
+(require "connections.rkt")
+
+(require "net.rkt")
 
 ; Declare boolean matrix of relay states where each relay at X Y
 ; connects row X to column Y when the value at X Y is #t
@@ -54,6 +58,7 @@
 (define current-row 0)
 
 (define (node-index node)
+  (display node)
   (index-of X-axis node))
 
 (define (matrix-implement-net net)
@@ -67,6 +72,11 @@
   (when (not (null? nets))
     (matrix-implement-net (car nets))
     (matrix-implement-nets (cdr nets))))
+
+
+(define (matrix-implement-current-connections)
+  (define nets (nets-add-connections `() (set->list connections)))
+  (matrix-implement-nets nets))
 
 ; pick a row y
 ; for each node, find its x

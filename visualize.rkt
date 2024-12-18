@@ -5,13 +5,9 @@
 ; and is typically referred to as the name of the color (red, blue, yellow, etc.) 
 ; Move the cursor vertically over each bar to alter its hue. 
 
-(require "connections.rkt")
-
 (require "targets.rkt")
 
 (require "matrix.rkt")
-
-(require "net.rkt")
 
 (require racket/set)
 
@@ -69,28 +65,3 @@
   (draw-matrix)
   )
 
-
-(define nets
-  (nets-add-connections `()
-                        (list
-                         (connection `n1-1 `GND)
-                         (connection `n1-3 `GND)
-                         (connection `n1-5 `GND)
-                         (connection `n1-6 `GND)
-                         (connection `n1-7 `GND)
-                         (connection `n1-8 `GND)
-                         (connection `n1-9 `GND)
-                         (connection `n1-10 `GND)
-                         (connection `n1-11 `GND)
-                         (connection `n1-19 `DMM_V_HI)
-                         
-                         (connection `J5a-1 `DMM_LO)
-                         (connection `PS_RAIL1 `J2-45)
-                         (connection `PS_RAIL2 `J2-44)
-                         (connection `PS_RAIL3 `J2-40)
-                         (connection `J2-30 `PS_RAIL3)
-
-
-                         )))
-
-(matrix-implement-nets nets)
