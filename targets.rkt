@@ -23,6 +23,7 @@
      `J2-7
      `J2-8
      `J2-9
+     `J2-10
      `J2-11
      `J2-12
      `J2-13
@@ -82,6 +83,7 @@
      `J5a-7
      `J5a-8
      `J5a-9
+     `J5a-10
      `J5a-11
      `J5a-12
      `J5a-13
@@ -204,6 +206,11 @@
      `J30-A ; CAN C
      `J30-B
      `J30-C
+     `J60-1 ; Platform proximity sensors
+     `J60-2
+     `J60-3
+     `J60-4
+     `J60-5
      `UTSG-1 ; TILT SENSOR
      `UTSG-2
      `UTSG-3
@@ -215,6 +222,4 @@
      `ROW1 ; Net connection resources
      `ROW2
      `ROW3
-     `ROW4
-     `ROW5
-     `ROW6))
+     `ROW4))

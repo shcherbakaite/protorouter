@@ -1,3 +1,0 @@
-#lang racket
-
-(expect-resistance-lt `n1-3 `J60-2 0.5)

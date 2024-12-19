@@ -64,7 +64,9 @@
 ;(define current-row 0)
 
 (define (node-index node)
-  (index-of X-axis node))
+  (match (index-of X-axis node)
+    [#f (error (format "Node does not exists: ~s" node) )]
+    [i i]))
 
 (define (matrix-implement-net current-row net)
   (for/set ([node net])
