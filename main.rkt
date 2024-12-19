@@ -86,6 +86,7 @@
 
 (thread
  (lambda ()
+   ;(run-test (string->path "n1-29_DO_COM.rkt"))
    (run-all-tests)
    ; (run-test "J2-30_LIDAR_GND.rkt")
    
@@ -95,7 +96,7 @@
    
    ; (run-test "J30-A_J30-B_J30-C.rkt")
    
-   ; (run-test "J5a-28_OP_CONSOLE_24V.rkt")
+   ; (run-test (string->path "J5a-30_OP_CONSOLE_12V.rkt"))
 
     ; (run-test "J2-30_LIDAR_GND.rkt")
    
