@@ -1,4 +1,3 @@
-;#lang racket
 ; This test involves multiple signals E-STOP and Interlock.
 ; Relay K10 interrupts coil current to K6 relay when K10 is off.
 ; K10 turns off 4 seconds after E-STOP signal goes low. 
@@ -26,7 +25,7 @@
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-43. Measured ~s V. (Check K10 mode)" v) (eq-within v 48 1)))
 
 ; Disable E-STOP signal and wait for K10 safety relay to cut interlock signal
-(disconnect `J5a-18)
+(remove-voltage `J5a-18)
 (apply-ground `J5a-18)
 
 ; Wait for sefety relay K10 to go off
@@ -41,4 +40,3 @@
 (let ([v (voltage `J2-43)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-43. Measured ~s V. (Check K10 mode)" v) (eq-within v 0 1)))
 
-;(disconnect-all)

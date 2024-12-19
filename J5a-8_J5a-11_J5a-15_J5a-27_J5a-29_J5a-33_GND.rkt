@@ -1,5 +1,3 @@
-#lang racket
-
 (apply-ground `J2-32)     ; Ground
 
 ; GND 5V

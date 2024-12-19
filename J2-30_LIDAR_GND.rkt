@@ -1,4 +1,3 @@
-#lang racket
 
 ; DI_COM test
 (apply-ground `J2-32)

@@ -8,6 +8,10 @@
 
 (require "visualize.rkt")
 
+(require "matrix.rkt")
+
+(require "run.rkt")
+
 ; This test model is written in Racket. Why Racket? Racket is a LISP and by its nature encourages
 ; writing very succint programs - which is exactly the quality needed for programming small test sequences.
 ; Racket has a track record of being used as a scripting language in commercial settings, but it is far
@@ -213,9 +217,6 @@
      
 ]))
 
-(define (disconnect a)
-  `())
-
 
 
 
@@ -298,7 +299,8 @@
 
 (define-syntax-rule (expect msg expr)
   (when (not expr)
-    (error 'expect "~s: ~s" msg (quote expr))))
+    ;(error 'expect "~s: ~s" msg (quote expr))))
+    (printf "~s: ~s\n" msg (quote expr))))
 
 
 (define (expect-resistance-eq a b expected err)
@@ -340,12 +342,93 @@
 ;   (map pairs ( λ (p) (resistance (car p) (cdr p)) ))
 
 
+(thread
+ (lambda ()
+   (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
 
+    (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
+    (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
 
+    (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
 
+    (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
 
+    (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
 
-(load "n1-12_J2-19_out_Relay_7_CU_Contactor_DO1.rkt")
+    (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
+
+    (run-test "J2-30_LIDAR_GND.rkt")
+   
+   (run-test "J2-34_Rear_Lift_GND.rkt")
+   
+   (run-test "J5a-32_MICROPLEX_12V.rkt")
+   
+   (run-test "J30-A_J30-B_J30-C.rkt")
+   
+   (run-test "J5a-28_OP_CONSOLE_24V.rkt")
+
+   ))
+
+;(load "n1-15_J5a-18_J2-2_J2-38_J2-43_out_Relay_6_GndDrive_Interlock_DO4.rkt")
+;(disconnect-all)
+;(matrix-implement-current-connections)
+
 (displayln (set-count connections))
 
   

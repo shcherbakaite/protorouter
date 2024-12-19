@@ -1,5 +1,3 @@
-;#lang racket
-
 ; out_Relay_4_GndDrive_KSI_DO3
 
 ; Master Bus On
@@ -20,4 +18,3 @@
 (let ([v (voltage `J2-43)])
 	(expect (format "Applied 24V via n1-14 to Coil of Relay K4. Expected 48V on J2-43. Measured ~s V" v) (eq-within v 48 1)))
 
-;(disconnect-all)

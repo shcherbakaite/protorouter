@@ -55,28 +55,33 @@
 (define (matrix-connected? x y)
   (array-ref matrix (vector x y)))
 
-(define current-row 0)
+(define (matrix-clear)
+  (for ([x (in-range 0 (matrix-dim-x))])
+  (for ([y (in-range 0 (matrix-dim-y))])
+    (array-set! matrix (vector x y) #f)
+    )))
+
+;(define current-row 0)
 
 (define (node-index node)
-  (display node)
   (index-of X-axis node))
 
-(define (matrix-implement-net net)
+(define (matrix-implement-net current-row net)
   (for/set ([node net])
     (let ([x (node-index node)]
           [y current-row])
       (matrix-connect x y)))
   (set! current-row (+ current-row 1)))
 
-(define (matrix-implement-nets nets)
+(define (matrix-implement-nets current-row nets)
   (when (not (null? nets))
-    (matrix-implement-net (car nets))
-    (matrix-implement-nets (cdr nets))))
-
+    (matrix-implement-net current-row (car nets))
+    (matrix-implement-nets (+ current-row 1) (cdr nets))))
 
 (define (matrix-implement-current-connections)
   (define nets (nets-add-connections `() (set->list connections)))
-  (matrix-implement-nets nets))
+  (matrix-clear)
+  (matrix-implement-nets 0 nets))
 
 ; pick a row y
 ; for each node, find its x

@@ -1,5 +1,3 @@
-#lang racket
-
 ; OP_CONSOLE_12V, J2-29.rkt
 
 ; Master Bus On
@@ -10,4 +8,3 @@
 (let ([v (voltage `J5a-30)])
     (expect (format "Enabled auxilary power, relay K2. Expected 12V on J2-30. Measured ~s V." v) (eq-within v 12 1)))
 
-(disconnect-all)

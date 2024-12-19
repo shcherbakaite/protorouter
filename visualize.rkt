@@ -9,6 +9,8 @@
 
 (require "matrix.rkt")
 
+(require "run.rkt")
+
 (require racket/set)
 
 (define bar-width 20)
@@ -55,8 +57,13 @@
     )))
    (pop-matrix))
 
+(define (draw-title)
+  (text current-test 0 0))
+
 (define (draw)
   (define which-bar (quotient mouse-x bar-width))
+  (background 0)
+  (draw-title)
   ;(text (format "~s" (set-count connections)) 10 140)
   (draw-x-axis (map symbol->string X-axis) 20)
   (draw-y-axis (list "1" "2" "3" "4" "5" "6") 100 )

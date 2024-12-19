@@ -1,4 +1,3 @@
-#lang racket
 
 ; J2-12_Front_Lift_Logic_GND test
 (apply-ground `J2-32)

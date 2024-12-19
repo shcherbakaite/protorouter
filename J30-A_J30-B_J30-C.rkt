@@ -1,5 +1,3 @@
-#lang racket
-
 ; CAN C test
 
 (apply-ground `J2-32) ; Ground the box
