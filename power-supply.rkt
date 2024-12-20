@@ -2,7 +2,7 @@
 
 (require "connections.rkt")
 
-(provide apply-voltage apply-ground remove-voltage power-supply-set power-supply-on power-supply-off power-supply-passthrough power-supply-release-all)
+(provide apply-voltage apply-ground remove-voltage power-supply-set power-supply-on power-supply-off power-supply-passthrough power-supply-release-all get-voltage-source )
 
 ;; Power Resources
 
@@ -53,6 +53,14 @@
     (power-supply-set next-rail v)
     (power-supply-on next-rail)
     (connect next-rail a)
+    next-rail))
+
+; Reserve rail and set to voltage
+(define (get-voltage-source v)
+  (define next-rail (power-supply-reserve))
+  (when next-rail
+    (power-supply-set next-rail v)
+    (power-supply-on next-rail)
     next-rail))
 
 ; Disconnect all power sources and grounds from node

@@ -7,13 +7,13 @@
 (apply-ground `J2-32)     ; Ground
 
 ; Enable Aux Power, K2
-(apply-voltage `n1-32 24)
+(define rail24V (get-voltage-source 24))
 
 ; E-STOP signal to enable K10 safety relay
-(apply-voltage `J5a-18 24)
+(connect `J5a-18 rail24V)
 
 ; out_Relay_6_GndDrive_Interlock_DO4
-(apply-voltage `n1-15 24)
+(connect `n1-15 rail24V)
 
 (let ([v (voltage*  `J2-2)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-2. Measured ~s V. (Check K10 mode)" v) (eq-within v 48 1)))
