@@ -219,9 +219,9 @@
 
 (define Y-axis
 (list
-     `ROW1 ; Net connection resources
-     `ROW2
-     `ROW3
-     `ROW4))
+     `Y1 ; Net connection resources
+     `Y2
+     `Y3
+     `Y4))
      ;`ROW5
      ;`ROW6))

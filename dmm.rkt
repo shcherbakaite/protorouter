@@ -6,35 +6,33 @@
 
 ;; Test and measurement department over here
 
-(provide dmm-v dmm-r dmm-i resistance voltage)
+(provide dmm-v dmm-r dmm-i resistance voltage voltage*)
 
 
 (define (dmm-v)
-  (matrix-implement-current-connections)
+  (matrix-update)
   (printf "Reading voltage...\n")
   48) ; build the matrix
 
 (define (dmm-i)
-  (matrix-implement-current-connections)
-  0)
+  (matrix-update)
+  (printf "Reading current...\n")
+  1)
 
 (define (dmm-r)
-  (matrix-implement-current-connections)
+  (matrix-update)
+  (printf "Reading resistance...\n")
   120)
 
-;; Variable holding reference used for (voltage ...) function
-(define voltage-reference `GND)
-
-;; Change voltage reference
-(define (set-voltage-reference a)
-  (set! voltage-reference a))
+(define (voltage* a)
+  (voltage  a `GND))
 
 ; Perform voltage measurement referenced to voltage-reference
-(define (voltage a)
-  (connect `DMM_LO voltage-reference )
+(define (voltage  a b)
+  (connect `DMM_LO b )
   (connect `DMM_V_HI a)
   (let ([v (dmm-v)])
-    (disconnect `DMM_LO voltage-reference) ; clean up
+    (disconnect `DMM_LO b) ; clean up
     (disconnect `DMM_V_HI a)
     v))
 

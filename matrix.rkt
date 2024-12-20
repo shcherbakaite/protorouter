@@ -1,6 +1,6 @@
 #lang racket
 
-(provide matrix-implement-net matrix-implement-nets matrix-dim-y matrix-dim-x matrix-connected? matrix-connect matrix-implement-current-connections)
+(provide matrix-implement-net matrix-implement-nets matrix-dim-y matrix-dim-x matrix-connected? matrix-connect matrix-update)
 
 (require math)
 
@@ -72,15 +72,14 @@
   (for/set ([node net])
     (let ([x (node-index node)]
           [y current-row])
-      (matrix-connect x y)))
-  (set! current-row (+ current-row 1)))
+      (matrix-connect x y))))
 
 (define (matrix-implement-nets current-row nets)
   (when (not (null? nets))
     (matrix-implement-net current-row (car nets))
     (matrix-implement-nets (+ current-row 1) (cdr nets))))
 
-(define (matrix-implement-current-connections)
+(define (matrix-update)
   (define nets (nets-add-connections `() (set->list connections)))
   (matrix-clear)
   (matrix-implement-nets 0 nets))

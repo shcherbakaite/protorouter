@@ -4,6 +4,8 @@
 
 (require "connections.rkt")
 
+(require "power-supply.rkt")
+
 (define current-test "")
 
 
@@ -12,6 +14,7 @@
   (displayln (format "Running test: ~s\n" (path->string test)))
   (set! current-test  (path->string test))
   (disconnect-all) ; reset connections
+  (power-supply-release-all) ; release all power rails
   (load (build-path test-dir test))
   )
 

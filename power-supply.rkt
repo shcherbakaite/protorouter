@@ -2,7 +2,7 @@
 
 (require "connections.rkt")
 
-(provide apply-voltage apply-ground remove-voltage)
+(provide apply-voltage apply-ground remove-voltage power-supply-set power-supply-on power-supply-off power-supply-passthrough power-supply-release-all)
 
 ;; Power Resources
 
@@ -21,16 +21,16 @@
 ;; Low Level Power Management
 
 (define (power-supply-set rail v)
-  `())
+  (void))
 
 (define (power-supply-on rail)
-  `())
+  (void))
 
 (define (power-supply-off rail)
-  `())
+  (void))
 
 (define (power-supply-passthrough rail)
-  `())
+  (void))
 
 ;; High Level Power Management
 
@@ -41,6 +41,10 @@
 
 (define (power-supply-release rail)
   (hash-set! power-resources rail #f))
+
+(define (power-supply-release-all)
+  (for ([rail (in-hash-keys power-resources)])
+    (hash-set! power-resources rail #f)))
 
 ; Apply voltage to a target node
 (define (apply-voltage a v)

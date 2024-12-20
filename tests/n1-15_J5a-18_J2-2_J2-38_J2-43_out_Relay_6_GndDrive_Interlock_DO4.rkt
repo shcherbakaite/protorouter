@@ -15,13 +15,13 @@
 ; out_Relay_6_GndDrive_Interlock_DO4
 (apply-voltage `n1-15 24)
 
-(let ([v (voltage `J2-2)])
+(let ([v (voltage*  `J2-2)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-2. Measured ~s V. (Check K10 mode)" v) (eq-within v 48 1)))
 
-(let ([v (voltage `J2-38)])
+(let ([v (voltage*  `J2-38)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-38. Measured ~s V. (Check K10 mode)" v) (eq-within v 48 1)))
 
-(let ([v (voltage `J2-43)])
+(let ([v (voltage*  `J2-43)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-43. Measured ~s V. (Check K10 mode)" v) (eq-within v 48 1)))
 
 ; Disable E-STOP signal and wait for K10 safety relay to cut interlock signal
@@ -31,12 +31,12 @@
 ; Wait for sefety relay K10 to go off
 (sleep 5)
 
-(let ([v (voltage `J2-2)])
+(let ([v (voltage*  `J2-2)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-2. Measured ~s V. (Check K10 mode)" v) (eq-within v 0 1)))
 
-(let ([v (voltage `J2-38)])
+(let ([v (voltage*  `J2-38)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-38. Measured ~s V. (Check K10 mode)" v) (eq-within v 0 1)))
 
-(let ([v (voltage `J2-43)])
+(let ([v (voltage*  `J2-43)])
 	(expect (format "Applied 24V via n1-15 to Coil of Relay K6. Expected 48V on J2-43. Measured ~s V. (Check K10 mode)" v) (eq-within v 0 1)))
 
