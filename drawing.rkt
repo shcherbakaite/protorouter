@@ -49,6 +49,7 @@
 
 
 (define (gl-draw-point center diameter color)
+    (glEnable GL_POINT_SMOOTH)
     (glPointSize diameter)
     (glColor3f (vec-r color) (vec-g color) (vec-b color))
     (glBegin GL_POINTS)

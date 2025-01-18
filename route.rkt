@@ -18,8 +18,7 @@
 
 (require "drawing.rkt")
 
-(define mouse-x 0.5)
-(define mouse-y 0.0)
+
 
 
 
@@ -264,8 +263,8 @@
       (let* ([new-position (vec+ position (get-lower-matrix-offset))])
         (repeat-with-gradient new-position (send this get-matrix-gradient-function) x-size matrix-y-size draw-pad))
 
-      (let* ([new-position (vec+ position (get-upper-matrix-offset))])
-        (repeat-with-gradient new-position (send this get-matrix-gradient-function) x-size matrix-y-size draw-pad))
+      ;(let* ([new-position (vec+ position (get-upper-matrix-offset))])
+      ;  (repeat-with-gradient new-position (send this get-matrix-gradient-function) x-size matrix-y-size draw-pad))
       
 `()
       )
@@ -315,9 +314,13 @@
     (super-new [style '(gl no-autoclear)]
                [gl-config gl-config])
 
+    (define mouse-x 0.5)
+    (define mouse-y 0.0)
+    (define aspect 1.0)
+    
     (define/override (on-size width height)
       (let-values ([(client-width client-height) (send this get-scaled-client-size)])
-      (define aspect (/ client-width client-height))
+      (set! aspect (/ client-width client-height))
        (with-gl-context
        (λ ()
          (glViewport 0 0 client-width client-height)
@@ -340,10 +343,33 @@
     
     (define/override (on-event event)
       (when (is-a? event mouse-event%)
+        (with-gl-context
+       (λ ()
+         (define a (glGetIntegerv GL_VIEWPORT))
+         ;(displayln (format "~s ~s ~s ~s" (s32vector-ref a 0) (s32vector-ref a 1) (s32vector-ref a 2) (s32vector-ref a 3))
+         
+        
         ;(displayln (format "~s ~s" mouse-x mouse-y))
-        (set! mouse-x  (send event get-x))
-        (set! mouse-y  (send event get-y))
-        (send this refresh)))          
+        (set! mouse-x  (/ (send event get-x)  (s32vector-ref a 2)))
+        (set! mouse-y  (/ (send event get-y)  (s32vector-ref a 3)))
+        (set! mouse-y (* mouse-y -2))
+        (set! mouse-x (* mouse-x (* 2 aspect)))
+        (set! mouse-x (- mouse-x (* 1 aspect)))
+        (set! mouse-y (+ mouse-y 1))
+        
+        (send this refresh)
+        ))
+
+        ))          
+
+ (with-gl-context
+       (λ ()
+         (glNewList 1 GL_COMPILE)
+
+         (send protomatrix draw)
+
+         (glEndList)))
+        
     
     (define/override (on-paint)
       (with-gl-context
@@ -351,6 +377,7 @@
 
          (glMatrixMode GL_MODELVIEW)
          (glLoadIdentity)
+         
          (glClearColor 0.0 0.0 0.1 0.0)
          (glClear (bitwise-ior GL_COLOR_BUFFER_BIT GL_DEPTH_BUFFER_BIT))
          
@@ -360,14 +387,18 @@
          ;(glDrawArrays GL_LINES 0 6)
          (glDisableClientState GL_VERTEX_ARRAY)
 
-         (gl-draw-line (vec2 0.0 0.0) (vec2 -100.0 0.0) (vec3 0.0 1.0 0.0) 2.0)
-   
-         (gl-draw-circle (vec2 (* 0.001 mouse-x) (* mouse-y 0.001)) 0.05 (vec3 0.75 0.0 0.0) 5.0 #t)
+         ;(gl-draw-line (vec2 0.0 0.0) (vec2 -1.0 0.0) (vec3 0.0 1.0 0.0) 2.0)
 
-         (send protomatrix set-position (vec2 (* 0.001 mouse-x) (* mouse-y 0.001)))
+         (gl-draw-line (vec2 -1.0 -1.0) (vec2 1.0 1.0) (vec3 0.0 1.0 0.0) 2.0)
+   
+         (gl-draw-circle (vec2  mouse-x  mouse-y) 0.05 (vec3 0.75 0.0 0.0) 5.0 #t)
+
+         (send protomatrix set-position (vec2 (* 0.001 mouse-x) (* mouse-y -0.001)))
          ;(send protomatrix draw-breadboard-area) 
          ;(send protomatrix draw-matrix-area)
-         (send protomatrix draw)
+         ;(send protomatrix draw)
+         ;(glTranslatef (- (* 0.001 mouse-x) 2.0) (* 0.001 mouse-y) 0.0)
+         (glCallList 1)
          (swap-gl-buffers))))))
 
 ; Make a canvas that handles events in the frame
@@ -380,7 +411,7 @@
 
 
 (define (show-frame label triangle-canvas%)
-  (define frame (new frame% [label label] [width 3840] [height 600]))
+  (define frame (new frame% [label label] [width 1000] [height 1000]))
   ; Make a button in the frame
   (new triangle-canvas% [parent frame])
   (send frame show #t))
