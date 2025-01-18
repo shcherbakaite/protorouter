@@ -66,7 +66,11 @@
          apply-matrix
          quat-rotate
          rcp
-         lerp)
+         lerp
+         vec-x!
+         vec-y!
+         vec-x+!
+         vec-y+!)
 
 
 (define (vec size param0 params)
@@ -138,6 +142,35 @@
   (for/list ([c (in-list channels)])
     (list-ref vec c)))
 
+
+(define-syntax-rule (vec-x! param0 param1)
+  (let ([new-vec (cons param1 (cdr param0))])
+    (set! param0 new-vec)))
+
+
+(define-syntax-rule (vec-y! param0 param1)
+  (let* ([x (car param0)]
+         [rest (cddr param0)]
+         [new-vec (cons x (cons param1 rest))])
+    (set! param0 new-vec)))
+
+
+(define-syntax-rule (vec-x+! param0 param1)
+  (let ([new-vec (cons (+ (car param0) param1) (cdr param0))])
+    (set! param0 new-vec)))
+
+(define-syntax-rule (vec-y+! param0 param1)
+  (let* ([x (car param0)]                  ; Extract the "x" component (first element)
+         [y (+ (cadr param0) param1)]      ; Add param1 to the "y" component (second element)
+         [rest (cddr param0)]              ; Extract the remaining elements after "y"
+         [new-vec (cons x (cons y rest))]) ; Create a new list with updated "y"
+    (set! param0 new-vec)))                ; Mutate param0 with the new list
+
+;; 
+;; (define (vec-y! param0 param1)
+;;   (let ([x (car param0)]
+;;         [rest (cddr param0)])
+;;   (cons x (cons param1 rest))))
 
 (define vec-x car)
 (define vec-y cadr)
