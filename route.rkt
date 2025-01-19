@@ -164,6 +164,11 @@
   
 ;(operator i j current-x current-y gradient-function)
 
+; Application state
+(define application%
+  (class object%
+    (super-new)))
+
 (define protomatrix%
   (class object%
     (super-new)
@@ -314,6 +319,12 @@
     (super-new [style '(gl no-autoclear)]
                [gl-config gl-config])
 
+    (define is-dragging #f)
+    (define drag-origin-x 0.0)
+    (define drag-origin-y 0.0)
+    (define offset-x 0.0)
+    (define offset-y 0.0)
+    
     (define mouse-x 0.5)
     (define mouse-y 0.0)
     (define aspect 1.0)
@@ -340,35 +351,73 @@
       ;'lower-prototype-area x y
       ;'lower-matrix-area x y
       ;'upper-matrix-area x y
+
+    (define/public (get-canvas-offset-x)
+      (if is-dragging
+          (+ offset-x (- mouse-x drag-origin-x))
+          offset-x))
+     
+
+    (define/public (get-canvas-offset-y)
+      (if is-dragging
+          (+ offset-y (- mouse-y drag-origin-y))
+          offset-y))
+      
+      
     
     (define/override (on-event event)
       (when (is-a? event mouse-event%)
+
+        
+          
+                   
         (with-gl-context
-       (λ ()
-         (define a (glGetIntegerv GL_VIEWPORT))
-         ;(displayln (format "~s ~s ~s ~s" (s32vector-ref a 0) (s32vector-ref a 1) (s32vector-ref a 2) (s32vector-ref a 3))
+            (λ ()
+              (define a (glGetIntegerv GL_VIEWPORT))
+              ;(displayln (format "~s ~s ~s ~s" (s32vector-ref a 0) (s32vector-ref a 1) (s32vector-ref a 2) (s32vector-ref a 3))
          
         
-        ;(displayln (format "~s ~s" mouse-x mouse-y))
-        (set! mouse-x  (/ (send event get-x)  (s32vector-ref a 2)))
-        (set! mouse-y  (/ (send event get-y)  (s32vector-ref a 3)))
-        (set! mouse-y (* mouse-y -2))
-        (set! mouse-x (* mouse-x (* 2 aspect)))
-        (set! mouse-x (- mouse-x (* 1 aspect)))
-        (set! mouse-y (+ mouse-y 1))
+              ;(displayln (format "~s ~s" mouse-x mouse-y))
+              (set! mouse-x  (/ (send event get-x)  (s32vector-ref a 2)))
+              (set! mouse-y  (/ (send event get-y)  (s32vector-ref a 3)))
+              (set! mouse-y (* mouse-y -2.0))
+              (set! mouse-x (* mouse-x (* 2.0 aspect)))
+              (set! mouse-x (- mouse-x (* 1.0 aspect)))
+              (set! mouse-y (+ mouse-y 1.0))
         
-        (send this refresh)
-        ))
+              (send this refresh)
+              ))
 
-        ))          
+        
 
- (with-gl-context
-       (λ ()
-         (glNewList 1 GL_COMPILE)
+      (when (and (not is-dragging) (send event button-down? 'middle))
+          (set! is-dragging #t)
+          (set! drag-origin-x mouse-x)
+          (set! drag-origin-y mouse-y)
+      )
 
-         (send protomatrix draw)
+;      (when is-dragging
+;        (set! offset-x (- mouse-x drag-origin-x))
+;        (set! offset-y (- mouse-y drag-origin-y)))
 
-         (glEndList)))
+
+      (when (send event button-changed? 'middle)
+        (when (and is-dragging (not (send event button-down? 'middle)))
+          (set! is-dragging #f)
+          (set! offset-x (+ offset-x (- mouse-x drag-origin-x)))
+          (set! offset-y (+ offset-y (- mouse-y drag-origin-y)))
+
+          ))
+
+      ))
+
+    (with-gl-context
+        (λ ()
+          (glNewList 1 GL_COMPILE)
+
+          (send protomatrix draw)
+
+          (glEndList)))
         
     
     (define/override (on-paint)
@@ -397,7 +446,7 @@
          ;(send protomatrix draw-breadboard-area) 
          ;(send protomatrix draw-matrix-area)
          ;(send protomatrix draw)
-         ;(glTranslatef (- (* 0.001 mouse-x) 2.0) (* 0.001 mouse-y) 0.0)
+         (glTranslatef   (get-canvas-offset-x) (get-canvas-offset-y) 0.0)
          (glCallList 1)
          (swap-gl-buffers))))))
 
