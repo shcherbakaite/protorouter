@@ -3,7 +3,8 @@
 (provide 
     line-geometry
     gl-draw-line
-    gl-draw-circle)
+    gl-draw-circle
+    gl-draw-point)
 
 (require 
     ffi/vector
@@ -45,3 +46,13 @@
         (set! p1 (vec+ center p1))
         (glVertex2f (vec-x p1) (vec-y p1)))
     (glEnd))
+
+
+(define (gl-draw-point center diameter color)
+    (glPointSize diameter)
+    (glColor3f (vec-r color) (vec-g color) (vec-b color))
+    (glBegin GL_POINTS)
+    (glVertex2f (vec-x center) (vec-y center))
+    (glEnd))
+
+  

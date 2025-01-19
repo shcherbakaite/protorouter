@@ -155,7 +155,7 @@
     (define line-width 1.0)
 
     (define/override (draw)
-       (gl-draw-circle (send this get-position) (send this get-size) color line-width #t))
+       (gl-draw-point (send this get-position) 5.0 color))
 
     ))
 
