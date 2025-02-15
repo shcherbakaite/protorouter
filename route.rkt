@@ -13,6 +13,7 @@
          racket/gui/base
          data/pvector
          data/collection
+         math/matrix
          "vec.rkt")
 
 
@@ -368,27 +369,35 @@
     (define/override (on-event event)
       (when (is-a? event mouse-event%)
 
-        
-          
-                   
         (with-gl-context
             (λ ()
               (define a (glGetIntegerv GL_VIEWPORT))
-              ;(displayln (format "~s ~s ~s ~s" (s32vector-ref a 0) (s32vector-ref a 1) (s32vector-ref a 2) (s32vector-ref a 3))
+              ;(displayln (format "~s ~s ~s ~s" (s32vector-ref a 0) (s32vector-ref a 1) (s32vector-ref a 2) (s32vector-ref a 3)))
          
-        
-              ;(displayln (format "~s ~s" mouse-x mouse-y))
-              (set! mouse-x  (/ (send event get-x)  (s32vector-ref a 2)))
-              (set! mouse-y  (/ (send event get-y)  (s32vector-ref a 3)))
-              (set! mouse-y (* mouse-y -2.0))
-              (set! mouse-x (* mouse-x (* 2.0 aspect)))
-              (set! mouse-x (- mouse-x (* 1.0 aspect)))
-              (set! mouse-y (+ mouse-y 1.0))
-        
-              (send this refresh)
-              ))
+              (let-values ([(w h) (send this get-client-size)])
+                (displayln (format "~s ~s : ~s ~s : ~s, ~s "(send event get-x) (send event get-y) w h (exact->inexact (/ w h)) (exact->inexact aspect)))
 
-        
+                (define a (/ w h))
+                (define M (matrix [[(* 2 (/ 1 w) a) 0 (- a)]
+                                   [0 (* -2 (/ 1 h) ) 1 ]
+                                   [0 0 0]]))
+
+                (define mouse-raw (matrix [[(send event get-x)]
+                                   [(send event get-y)]
+                                   [1]]))
+
+                (define mouse-gl (matrix* M mouse-raw))
+
+
+                ;(define mouse-raw (vec4 (send event get-x) (send event get-y) 1 1))
+                ;(define mouse-opengl (mat*  M mouse-raw))
+
+                (set! mouse-x (matrix-ref mouse-gl 0 0))
+                (set! mouse-y (matrix-ref mouse-gl 1 0))
+
+                (displayln (format "~s ~s" (exact->inexact mouse-x) (exact->inexact mouse-y)))
+                (send this refresh))
+              ))
 
       (when (and (not is-dragging) (send event button-down? 'middle))
           (set! is-dragging #t)
@@ -441,6 +450,14 @@
          (gl-draw-line (vec2 -1.0 -1.0) (vec2 1.0 1.0) (vec3 0.0 1.0 0.0) 2.0)
    
          (gl-draw-circle (vec2  mouse-x  mouse-y) 0.05 (vec3 0.75 0.0 0.0) 5.0 #t)
+
+         (gl-draw-circle (vec2  0.0 0.0) 0.05 (vec3 0.75 0.0 0.0) 1.0 #t)
+
+         (gl-draw-circle (vec2  1.0 0.0) 0.05 (vec3 0.75 0.0 0.0) 1.0 #t)
+
+         (gl-draw-circle (vec2  1.0 1.0) 0.05 (vec3 0.75 0.0 0.0) 1.0 #t)
+
+         (gl-draw-circle (vec2  1.0 -1.0) 0.05 (vec3 0.75 0.0 0.0) 1.0 #t)
 
          (send protomatrix set-position (vec2 (* 0.001 mouse-x) (* mouse-y -0.001)))
          ;(send protomatrix draw-breadboard-area) 
