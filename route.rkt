@@ -9,18 +9,31 @@
 
 (require ffi/vector
          opengl
+         racket/flonum
+         strokefont
+         "connections.rkt"
+         "targetnames.rkt"
+         "jumpers.rkt"
          racket/class
          racket/gui/base
          data/pvector
          data/collection
+         math/matrix
          "vec.rkt")
+
+
 
 
 (require "drawing.rkt")
 
-
-
-
+(define (draw-strokes strokes color width)
+  (glLineWidth width)
+  (glColor3f (vec-r color) (vec-g color) (vec-b color))
+  (for ([stroke strokes])
+  (glBegin GL_LINE_STRIP)
+    (for ([p stroke])
+      (glVertex2f (real->double-flonum (car p)) (real->double-flonum (* -1.0(cdr p)))))
+  (glEnd)))
 
 ; Make a frame by instantiating the frame% class
 (define frame (new frame% [label "Example"]))
@@ -61,6 +74,11 @@
 (define (fromIN x)
   (* x ppin))
 
+(define (gradient-negate-dy gradient-function)
+  (lambda (x y)
+    (let ([dxdy (gradient-function x y)])
+      (vec2 (vec-x dxdy) (- (vec-y dxdy))))))
+
 (define (repeat position dx dy countx county operator)
   (for ([i countx])
     (for ([j county])
@@ -73,7 +91,7 @@
   (for ([i count-x])
     (vec-y! current-offset (vec-y offset))
     (for ([j count-y])
-      (vec-y! dxdy (vec-y (gradient-function 0 0)))
+      (vec-y! dxdy (vec-y (gradient-function 0 j)))
       (operator i j current-offset gradient-function)
       (vec-y+! current-offset (vec-y dxdy))) ; advance y position by dy
 
@@ -186,13 +204,13 @@
     ; Vertical dimension of the matrix
     (define matrix-y-size 30)
     ; Vertical space between matrix area and prototyping area
-    (define matrix-to-breadboard-y-gap (fromIN 0.1))
+    (define matrix-to-breadboard-y-gap (fromIN 0.3))
     ; Matrix vertical pitch
     (define matrix-y-pitch (fromIN 0.045))
     ; Number of matrix rows after which an additional vertical space is added
     (define matrix-break-every 10)
     ; Additional break size
-    (define matrix-break-size (fromIN 0.030))
+    (define matrix-break-size (fromIN 0.010))
 
     (define style-line-width 1.0)
     (define style-line-color (vec3 1.0 0.7804 0.0))
@@ -210,7 +228,7 @@
       (let ([new-position (vec2 (vec-x position) (- (vec-y position) breadboard-gap)) ])
         (repeat new-position breadboard-pitch (- breadboard-pitch) x-size breadboard-column-size draw-pad)))
 
-     ; Relative position of lower matrix area
+    ; Relative position of lower matrix area
     (define/private (get-lower-matrix-offset)
       (vec2 0.0 (* breadboard-column-size breadboard-pitch)))
 
@@ -229,15 +247,15 @@
                   (send pad draw))
                 pads))
     
-    (define/public (draw-breadboard-area)
-      ;repeat(self.position[0], self.position[1], self.proto_pitch, self.proto_pitch, self.proto_area[0], self.proto_area[1], pad_operator)
-      (define (draw-pad i j x y dx dy)
-        (new breadboard-pad% [init-position (vec2 x y)] [init-location (new location% [x 0.0] [y 0.0])] [init-size 0.0])
-        (gl-draw-circle (vec2 x y) breadboard-hole-diameter style-line-color style-line-width #f))
+    ; (define/public (draw-breadboard-area)
+    ;   ;repeat(self.position[0], self.position[1], self.proto_pitch, self.proto_pitch, self.proto_area[0], self.proto_area[1], pad_operator)
+    ;   (define (draw-pad i j x y dx dy)
+    ;     (new breadboard-pad% [init-position (vec2 x y)] [init-location (new location% [x 0.0] [y 0.0])] [init-size 0.0])
+    ;     (gl-draw-circle (vec2 x y) breadboard-hole-diameter style-line-color style-line-width #f))
 
-      (repeat position breadboard-pitch breadboard-pitch x-size breadboard-column-size draw-pad)
-      (let ([new-position (vec2 (vec-x position) (- (vec-y position) breadboard-gap)) ])
-        (repeat new-position breadboard-pitch (- breadboard-pitch) x-size breadboard-column-size draw-pad)))
+    ;   (repeat position breadboard-pitch breadboard-pitch x-size breadboard-column-size draw-pad)
+    ;   (let ([new-position (vec2 (vec-x position) (- (vec-y position) breadboard-gap)) ])
+    ;     (repeat new-position breadboard-pitch (- breadboard-pitch) x-size breadboard-column-size draw-pad)))
    
     ; Function that defines spacing of matrix pads
     (define/public (get-matrix-gradient-function)
@@ -246,19 +264,20 @@
           (if (and (= (remainder j matrix-break-every) 0) (not (= j 0)))
               (+ matrix-y-pitch matrix-break-size)
               matrix-y-pitch))
+
         (vec2 breadboard-pitch matrix-y-modified-pitch)))
 
-    (define/public (draw-matrix-area)
-      (define (draw-pad i j position _)
-         (let ([new-pad (new matrix-pad% [init-position position] [init-location (new location% [x 0.0] [y 0.0])])])
-          (set! pads (conj pads new-pad))))
+;     (define/public (draw-matrix-area)
+;       (define (draw-pad i j position _)
+;          (let ([new-pad (new matrix-pad% [init-position position] [init-location (new location% [x 0.0] [y 0.0])])])
+;           (set! pads (conj pads new-pad))))
         
 
-      (let* ([new-position (vec+ position (get-lower-matrix-offset))])
-        (repeat-with-gradient new-position (send this get-matrix-gradient-function) x-size matrix-y-size draw-pad))
+;       (let* ([new-position (vec+ position (get-lower-matrix-offset))])
+;         (repeat-with-gradient new-position (send this get-matrix-gradient-function) x-size matrix-y-size draw-pad))
       
-`()
-      )
+; `()
+;       )
 
      (define/public (build-matrix-area)
       (define (draw-pad i j position _)
@@ -268,8 +287,8 @@
       (let* ([new-position (vec+ position (get-lower-matrix-offset))])
         (repeat-with-gradient new-position (send this get-matrix-gradient-function) x-size matrix-y-size draw-pad))
 
-      ;(let* ([new-position (vec+ position (get-upper-matrix-offset))])
-      ;  (repeat-with-gradient new-position (send this get-matrix-gradient-function) x-size matrix-y-size draw-pad))
+      (let* ([new-position (vec+ position (get-upper-matrix-offset))])
+       (repeat-with-gradient new-position (gradient-negate-dy (send this get-matrix-gradient-function)) x-size matrix-y-size draw-pad))
       
 `()
       )
@@ -368,27 +387,41 @@
     (define/override (on-event event)
       (when (is-a? event mouse-event%)
 
-        
-          
-                   
         (with-gl-context
             (λ ()
               (define a (glGetIntegerv GL_VIEWPORT))
-              ;(displayln (format "~s ~s ~s ~s" (s32vector-ref a 0) (s32vector-ref a 1) (s32vector-ref a 2) (s32vector-ref a 3))
+              ;(displayln (format "~s ~s ~s ~s" (s32vector-ref a 0) (s32vector-ref a 1) (s32vector-ref a 2) (s32vector-ref a 3)))
          
-        
-              ;(displayln (format "~s ~s" mouse-x mouse-y))
-              (set! mouse-x  (/ (send event get-x)  (s32vector-ref a 2)))
-              (set! mouse-y  (/ (send event get-y)  (s32vector-ref a 3)))
-              (set! mouse-y (* mouse-y -2.0))
-              (set! mouse-x (* mouse-x (* 2.0 aspect)))
-              (set! mouse-x (- mouse-x (* 1.0 aspect)))
-              (set! mouse-y (+ mouse-y 1.0))
-        
-              (send this refresh)
-              ))
+              (let-values ([(w h) (send this get-client-size)])
+                (displayln (format "~s ~s : ~s ~s : ~s, ~s "(send event get-x) (send event get-y) w h (exact->inexact (/ w h)) (exact->inexact aspect)))
 
-        
+                (define a (/ w h))
+                (define M 
+                  (if (> a 1.0)
+                    (matrix [[(* 2 (/ 1 w) a) 0 (- a)]
+                                    [0 (* -2 (/ 1 h) ) 1 ]
+                                    [0 0 0]])
+                    (matrix [[(* 2 (/ 1 w) ) 0 -1]
+                                    [0 (* -2 (/ 1 h) (/ 1 a)) (/ 1 a) ]
+                                    [0 0 0]])))
+
+
+                (define mouse-raw (matrix [[(send event get-x)]
+                                   [(send event get-y)]
+                                   [1]]))
+
+                (define mouse-gl (matrix* M mouse-raw))
+
+
+                ;(define mouse-raw (vec4 (send event get-x) (send event get-y) 1 1))
+                ;(define mouse-opengl (mat*  M mouse-raw))
+
+                (set! mouse-x (matrix-ref mouse-gl 0 0))
+                (set! mouse-y (matrix-ref mouse-gl 1 0))
+
+                (displayln (format "~s ~s" (exact->inexact mouse-x) (exact->inexact mouse-y)))
+                (send this refresh))
+              ))
 
       (when (and (not is-dragging) (send event button-down? 'middle))
           (set! is-dragging #t)
@@ -415,6 +448,7 @@
         (λ ()
           (glNewList 1 GL_COMPILE)
 
+          (draw-strokes  (char->strokes (real->double-flonum 0.01) #\ξ) (vec3 0.75 0.0 0.0) 1.0)
           (send protomatrix draw)
 
           (glEndList)))
@@ -436,10 +470,7 @@
          ;(glDrawArrays GL_LINES 0 6)
          (glDisableClientState GL_VERTEX_ARRAY)
 
-         ;(gl-draw-line (vec2 0.0 0.0) (vec2 -1.0 0.0) (vec3 0.0 1.0 0.0) 2.0)
 
-         (gl-draw-line (vec2 -1.0 -1.0) (vec2 1.0 1.0) (vec3 0.0 1.0 0.0) 2.0)
-   
          (gl-draw-circle (vec2  mouse-x  mouse-y) 0.05 (vec3 0.75 0.0 0.0) 5.0 #t)
 
          (send protomatrix set-position (vec2 (* 0.001 mouse-x) (* mouse-y -0.001)))
@@ -453,14 +484,40 @@
 ; Make a canvas that handles events in the frame
 (new my-canvas% [parent frame])
 
+
+
+; create jumpers
+; jumpers create connections
+; connections create nets
+; nets colorize jumpers
+; nets set crosspoints
+
 ; Show the frame by calling its show method
 (send frame show #t)
 
-
-
-
 (define (show-frame label triangle-canvas%)
-  (define frame (new frame% [label label] [width 1000] [height 1000]))
+  (define frame (new frame% [label label] [width 1500] [height 1000]))
+
+  ; main menu
+  (define main-menu (new menu-bar% [parent frame]))
+  (define menu-file (new menu% [label "File"] [parent main-menu]))
+  (new menu-item%	[label "Open"] [parent menu-file] 
+      [callback  (λ (r e) `())])
+
+  (connect (XA 1) (XB 2))
+  (connect (XA 1) (XB 2))
+
+
+  (define menu-edit (new menu% [label "Edit"] [parent main-menu]))
+  (define menu-settings (new menu% [label "Settings"] [parent main-menu]))
+  (new menu-item%	[label "Board Size"] [parent menu-settings] 
+      [callback  (λ (r e) `())])
+
+  ;(send main-menu enable #t)
+
+
+
+
   ; Make a button in the frame
   (new triangle-canvas% [parent frame])
   (send frame show #t))
