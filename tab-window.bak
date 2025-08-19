@@ -1,0 +1,157 @@
+#lang racket/gui
+
+(require racket/class
+         racket/gui/base)
+
+; Create the main frame
+(define main-frame (new frame% 
+                       [label "Test Control Panel"]
+                       [width 800]
+                       [height 600]))
+
+; Create a tab panel
+(define tab-panel (new tab-panel% 
+                      [parent main-frame]
+                      [choices (list "Test Runner" "Configuration" "Results" "Help")]
+                      [callback (lambda (tab-panel event)
+                                  (let ([selection (send tab-panel get-selection)])
+                                    (case selection
+                                      [(0) (displayln "Test Runner tab selected")]
+                                      [(1) (displayln "Configuration tab selected")]
+                                      [(2) (displayln "Results tab selected")]
+                                      [(3) (displayln "Help tab selected")])))]))
+
+; Create content for the Test Runner tab
+(define test-runner-panel (new panel% [parent tab-panel]))
+(define test-runner-msg (new message% 
+                             [parent test-runner-panel]
+                             [label "Test Runner Panel"]))
+(define run-test-btn (new button% 
+                          [parent test-runner-panel]
+                          [label "Run Current Test"]
+                          [callback (lambda (button event)
+                                      (displayln "Running current test..."))]))
+(define run-all-btn (new button% 
+                         [parent test-runner-panel]
+                         [label "Run All Tests"]
+                         [callback (lambda (button event)
+                                     (displayln "Running all tests..."))]))
+
+; Create content for the Configuration tab
+(define config-panel (new panel% [parent tab-panel]))
+(define config-msg (new message% 
+                        [parent config-panel]
+                        [label "Configuration Panel"]))
+(define config-list (new list-box% 
+                         [parent config-panel]
+                         [label "Test Configuration"]
+                         [choices (list "Power Supply Settings" 
+                                       "Connection Settings" 
+                                       "Matrix Settings" 
+                                       "DMM Settings")]
+                         [callback (lambda (list-box event)
+                                     (let ([selection (send list-box get-selection)])
+                                       (when selection
+                                         (displayln (format "Selected config: ~s" selection)))))])
+
+; Create content for the Results tab
+(define results-panel (new panel% [parent tab-panel]))
+(define results-msg (new message% 
+                         [parent results-panel]
+                         [label "Test Results"]))
+(define results-text (new text-field% 
+                          [parent results-panel]
+                          [label "Results Output"]
+                          [style '(multiple)]
+                          [min-height 200]
+                          [init-value "Test results will appear here..."]))
+
+; Create content for the Help tab
+(define help-panel (new panel% [parent tab-panel]))
+(define help-msg (new message% 
+                      [parent help-panel]
+                      [label "Help and Documentation"]))
+(define help-text (new text-field% 
+                       [parent help-panel]
+                       [label "Help Information"]
+                       [style '(multiple)]
+                       [min-height 200]
+                       [init-value "Welcome to the Test Control Panel!
+
+This application provides a graphical interface for running and managing tests.
+
+Tabs:
+- Test Runner: Execute individual or all tests
+- Configuration: Modify test settings and parameters
+- Results: View test output and results
+- Help: This help information
+
+For more information, refer to the project documentation."]))
+
+; Add the panels to the tab panel
+(send tab-panel append "Test Runner")
+(send tab-panel append "Configuration") 
+(send tab-panel append "Results")
+(send tab-panel append "Help")
+
+; Create a status bar at the bottom
+(define status-bar (new message% 
+                        [parent main-frame]
+                        [label "Ready"]))
+
+; Create a menu bar
+(define menu-bar (new menu-bar% [parent main-frame]))
+
+; File menu
+(define file-menu (new menu% [parent menu-bar] [label "File"]))
+(new menu-item% [parent file-menu] 
+                [label "Open Test File..."]
+                [callback (lambda (item event) (displayln "Open file..."))])
+(new menu-item% [parent file-menu] 
+                [label "Save Results..."]
+                [callback (lambda (item event) (displayln "Save results..."))])
+(new separator-menu-item% [parent file-menu])
+(new menu-item% [parent file-menu] 
+                [label "Exit"]
+                [callback (lambda (item event) (send main-frame show #f))])
+
+; Test menu
+(define test-menu (new menu% [parent menu-bar] [label "Test"]))
+(new menu-item% [parent test-menu] 
+                [label "Run Current Test"]
+                [callback (lambda (item event) (displayln "Running current test..."))])
+(new menu-item% [parent test-menu] 
+                [label "Run All Tests"]
+                [callback (lambda (item event) (displayln "Running all tests..."))])
+
+; Help menu
+(define help-menu (new menu% [parent menu-bar] [label "Help"]))
+(new menu-item% [parent help-menu] 
+                [label "About"]
+                [callback (lambda (item event) 
+                           (message-box "About" 
+                                       "Test Control Panel v1.0\n\nA GUI interface for managing test execution." 
+                                       main-frame 
+                                       '(ok)))])
+(new menu-item% [parent help-menu] 
+                [label "Documentation"]
+                [callback (lambda (item event) (displayln "Show documentation..."))])
+
+; Function to show the window
+(define (show-tab-window)
+  (send main-frame show #t))
+
+; Function to update status
+(define (update-status message)
+  (send status-bar set-label message))
+
+; Function to add test result
+(define (add-test-result result-text)
+  (send results-text set-value (string-append (send results-text get-value) "\n" result-text)))
+
+; Export functions for external use
+(provide show-tab-window update-status add-test-result)
+
+; Show the window when the file is run directly
+(when (eq? (current-command-line-arguments) #())
+  (show-tab-window)) 
