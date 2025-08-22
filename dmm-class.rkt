@@ -15,12 +15,13 @@
 (define dmm%
   (class object%
     (super-new)
-    
-    (abstract dc-voltage)
-    ;(abstract ac-voltage)
-    ;(abstract resistance)
-    ;(abstract dc-current)
-    ;(abstract ac-current)
+
+    (abstract measure?)
+    (abstract resistance-mode!)
+    (abstract dc-voltage-mode!)
+    (abstract ac-voltage-mode!)
+    (abstract dc-current-mode!)
+    (abstract ac-current-mode!)
        
     ))
 
@@ -29,11 +30,24 @@
 
 (displayln (serial-ports))
 
-(define-values (in out)
-  (open-serial-port  "/dev/ttyUSB0" #:baudrate 115200))
+;(define-values (in out)
+;  (open-serial-port  "COM5"))
+                     
+(define read-buffer (make-bytes 100))
 
 ;(let loop ()
-;  (displayln (read-line in))
+;    (define read-result (read-bytes-avail!* read-buffer in))
+;    (cond [(or (eof-object? read-result)
+;               (and (number? read-result) (not (= read-result 0))))
+;           (display (bytes->string/utf-8 (read-bytes read-result in)))
+;           (display "")]
+;          [else (sleep 0.1)])
+;    (loop))
+
+;(let loop ()
+;  (writeln "OHMS" out)
+  ;(displayln (read-line in))
+;  (sleep 1)
 ;  (loop)
 ;)
   
@@ -51,30 +65,57 @@
 ;  (sleep 0.5) ; prevent busy-waiting
 ;  (loop))
 
+;; helper: open port, run a thunk, then close everything
+(define (with-serial com-port proc)
+  (define-values (in out)
+    (open-serial-port com-port #:baudrate 9600))
+  (define result (proc in out))
+  (close-output-port out)
+  (close-input-port in)
+  result)
 
 ;; Basic DMM Class Definition
 (define fluke45-dmm%
   (class dmm%
     (super-new)
 
-    (field [com-port "/dev/ttyUSB0"])
-     
-    (define/override (dc-voltage)
-      (define-values (in out)
-        (open-serial-port  "/dev/ttyUSB0" #:baudrate 115200))
-      
-      (write "VDC\n" out)
-      (define resp (read-line in))
+    (field [com-port "COM5"])
 
-      (close-output-port out)
-      (close-input-port in)
-      resp
-      )
-      
-    ;(abstract ac-voltage)
-    ;(abstract resistance)
-    ;(abstract dc-current)
-    ;(abstract ac-current)
+    (define/override (dc-current-mode!)
+       (with-serial com-port
+        (λ (in out)
+          (write "ADC\n" out)
+          (read-line in))))
 
+    (define/override (ac-current-mode!)
+      (with-serial com-port
+        (λ (in out)
+          (write "AAC\n" out)
+          (read-line in))))
+    
+    (define/override (ac-voltage-mode!)
+      (with-serial com-port
+        (λ (in out)
+          (write "VAC\n" out)
+          (read-line in))))
+    
+    (define/override (resistance-mode!)
+        (with-serial com-port
+        (λ (in out)
+          (write "OHMS\n" out)
+          (read-line in))))
+    
+    (define/override (dc-voltage-mode!)
+      (with-serial com-port
+        (λ (in out)
+          (write "VDC\n" out)
+          (read-line in))))
 
+    (define/override (measure?)
+      (with-serial com-port
+        (λ (in out)
+          (write "*OPN?\n" out)
+          (write "MEAS1?\n" out)
+          (string->number (read-line in)))))
+    
     ))
