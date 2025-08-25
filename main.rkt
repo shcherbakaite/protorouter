@@ -6,6 +6,8 @@
 
 (require "dmm.rkt")
 
+(require "dmm-class.rkt")
+
 (require "visualize.rkt")
 
 (require "interaction.rkt")
@@ -22,6 +24,8 @@
 ; from being the only available Scheme implementation.
 
 ; https://www.youtube.com/watch?v=ydyztGZnbNs
+
+(attach-dmm (new fluke45-dmm%))
 
 (define (fus a)
   (connect `DMM_LO a )

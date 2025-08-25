@@ -4,6 +4,8 @@
          racket/gui/base
          racket/string)
 
+(require canvas-list)
+
 ; Create the main frame
 (define main-frame (new frame% 
                        [label "Test Control Panel"]
@@ -108,22 +110,12 @@
 (define help-msg (new message% 
                       [parent help-panel]
                       [label "Tests Panel"]))
-(define help-text (new text-field% 
-                       [parent help-panel]
-                       [label "Help Information"]
-                       [style '(multiple)]
-                       [min-height 200]
-                       [init-value "Welcome to the Test Control Panel!
-
-This application provides a graphical interface for running and managing tests.
-
-Tabs:
-- Test Runner: Execute individual or all tests
-- Configuration: Modify test settings and parameters
-- Results: View test output and results
-- Help: This help information
-
-For more information, refer to the project documentation."]))
+(define help-text (new canvas-list%
+       [parent help-panel]
+       [items (range 1000)]
+       [item-height 100]
+       [action-callback (λ (canvas item event)
+                          (displayln item))]))
 
 ; Create grouped icon buttons with labels underneath (compact)
 ; Power Source group

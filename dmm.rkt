@@ -1,28 +1,40 @@
 #lang racket
 
+(require racket/class)
+
 (require "connections.rkt")
 
 (require "matrix.rkt")
 
+(require "dmm-class.rkt")
+
 ;; Test and measurement department over here
 
-(provide dmm-v dmm-r dmm-i resistance voltage voltage*)
+(provide dmm-v dmm-r dmm-i resistance voltage voltage* attach-dmm)
 
+(define dmm-instance #f)
+
+(define (attach-dmm d)
+  (set! dmm-instance d))
 
 (define (dmm-v)
   (matrix-update)
+  (send dmm-instance vdc!)
   (printf "Reading voltage...\n")
-  48) ; build the matrix
+  (send dmm-instance measure?))
+  ;48) ; build the matrix
 
 (define (dmm-i)
   (matrix-update)
+  (send dmm-instance adc!)
   (printf "Reading current...\n")
-  1)
+  (send dmm-instance measure?))
 
 (define (dmm-r)
   (matrix-update)
+  (send dmm-instance ohms!)
   (printf "Reading resistance...\n")
-  120)
+  (send dmm-instance measure?))
 
 (define (voltage* a)
   (voltage  a `GND))
@@ -44,5 +56,6 @@
     (disconnect `DMM_LO a) ; clean up
     (disconnect `DMM_V_HI b)
     r))
+
 
 
